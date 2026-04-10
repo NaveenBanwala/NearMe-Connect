@@ -1,0 +1,35 @@
+Java Version
+Java 17 (LTS) — it's the most stable, widely supported, and required by modern Spring Boot 3.x.
+
+Spring Initializr Setup
+Go to start.spring.io and configure exactly this:
+
+<!-- 
+Project:      Maven
+Language:     Java
+Spring Boot:  3.3.x  (latest stable)
+Packaging:    Jar
+Java:         17
+
+Group:    com.nearme
+Artifact: backend
+Name:     NearMe Backend
+Package:  com.nearme -->
+
+
+Dependencies to Add
+
+## Summary — What to tick in Initializr
+```
+✅ Spring Web
+✅ Spring WebSocket
+✅ Validation
+✅ Spring Security
+✅ OAuth2 Resource Server
+✅ Spring Data JPA
+✅ PostgreSQL Driver
+✅ Flyway Migration
+✅ Spring Boot DevTools
+✅ Lombok
+✅ Spring Boot Actuator
+✅ Configuration Processor

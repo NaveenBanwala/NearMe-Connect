@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+
+/* ── Force class-based dark mode (Tailwind v4 defaults to OS media query) ── */
+/* Without this, dark: classes activate based on OS setting, not your toggle  */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans:   'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display:'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:   'JetBrains Mono', ui-monospace, monospace;
+
+  --color-brand-50:  #f0fdf9;
+  --color-brand-100: #ccfbef;
+  --color-brand-200: #99f6e0;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #2ab191;
+  --color-brand-600: #239a80;
+  --color-brand-700: #1a7a68;
+  --color-brand-800: #145f52;
+  --color-brand-900: #0d4a3f;
+
+  --color-map: #12181f;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+  }
+}
+
+@layer utilities {
+  /* App shell background — white in light, dark slate in dark mode */
+  .bg-app {
+    background-color: #f8fafc;
+  }
+  .dark .bg-app {
+    background-color: #0f172a;
+  }
+}
+/* @import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-brand: #2ab191;
+  --color-brand-hover: #239a80;
+  --color-map: #12181f;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+  }
+} */

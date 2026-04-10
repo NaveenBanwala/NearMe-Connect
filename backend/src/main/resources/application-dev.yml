@@ -1,0 +1,20 @@
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    com.nearme: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# In dev, use a dummy Twilio — just log the OTP to console
+twilio:
+  account-sid: "DUMMY"
+  auth-token: "DUMMY"
+  phone-number: "+15005550006"

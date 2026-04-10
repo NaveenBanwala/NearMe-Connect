@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    com.nearme: WARN
+    root: ERROR
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never

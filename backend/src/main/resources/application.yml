@@ -1,0 +1,52 @@
+services:
+
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: nearme-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: nearme
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nearme"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: nearme-backend
+    restart: always
+    ports:
+      - "8081:8080"                          # ← changed from 8080 to 8082
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/nearme
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_FLYWAY_ENABLED=true
+      - JWT_SECRET=dev-secret-replace-with-64-char-random-string-in-production
+
+  admin-panel:
+    build: ./admin-panel
+    container_name: nearme-admin
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8082    # ← updated to match new port
+
+volumes:
+  postgres_data:

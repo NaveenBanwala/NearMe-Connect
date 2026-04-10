@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+
+  # ── Database ─────────────────────────────────────────────────────
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: nearme-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: nearme
+    ports:
+      - "5433:5432"      # 5433 on host → 5432 in container (avoids conflict with local PG)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nearme"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Spring Boot Backend ──────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: nearme-backend
+    restart: always
+    ports:
+      - "8082:8080"
+    depends_on:
+      db:
+        condition: service_healthy    # wait for DB to be ready
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SERVER_PORT=8080
+      - DB_HOST=db                   # Docker service name — not localhost
+      - DB_PORT=5432
+      - DB_NAME=nearme
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/nearme
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SPRING_FLYWAY_ENABLED=true
+      - JWT_SECRET=dev-secret-replace-with-64-char-random-string-in-production
+
+  # ── Admin Panel ──────────────────────────────────────────────────
+  admin-panel:
+    build: ./admin-panel
+    container_name: nearme-admin
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8081    # frontend runs in browser so localhost is correct here
+
+volumes:
+  postgres_data:
+
+# services:
+#   # --- Database Service ---
+#   db:
+#     image: postgis/postgis:15-3.3 # Includes Postgres + PostGIS
+#     container_name: nearme-db
+#     restart: always
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password
+#       POSTGRES_DB: nearme
+#     ports:
+#       - "5433:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#       # Automatically runs schema and seed on first startup
+#       - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+#       - ./database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+
+#   # --- Spring Boot Backend ---
+#   backend:
+#     build: ./backend
+#     container_name: nearme-backend
+#     ports:
+#       - "8081:8081"
+#     depends_on:
+#       - db
+#     environment:
+#       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/nearme
+#       - SPRING_DATASOURCE_USERNAME=postgres
+#       - SPRING_DATASOURCE_PASSWORD=password
+#       - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+#       - SPRING_FLYWAY_ENABLED=true
+
+#   # --- Admin Web Panel ---
+#   admin-panel:
+#     build: ./admin-panel
+#     container_name: nearme-admin
+#     ports:
+#       - "3000:3000"
+#     depends_on:
+#       - backend
+#     environment:
+#       - REACT_APP_API_URL=http://localhost:8080
+
+# volumes:
+#   postgres_data:
