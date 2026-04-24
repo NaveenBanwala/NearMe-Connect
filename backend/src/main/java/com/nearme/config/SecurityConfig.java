@@ -57,6 +57,12 @@ public class SecurityConfig {
                 .requestMatchers("/ws/**").permitAll()
 
                 // ── Public read-only endpoints ───────────────────────────────
+
+
+                .requestMatchers(HttpMethod.GET, "/clusters/nearby").permitAll()
+.requestMatchers(HttpMethod.GET, "/requests/radius").permitAll()
+.requestMatchers(HttpMethod.POST, "/requests").permitAll() 
+
                 .requestMatchers(HttpMethod.GET, "/blocks/nearby").permitAll()
                 .requestMatchers(HttpMethod.GET, "/blocks/nearby/campus").permitAll()
                 .requestMatchers(HttpMethod.GET, "/blocks/search").permitAll()

@@ -16,71 +16,128 @@ import java.util.UUID;
 public interface RequestRepository extends JpaRepository<Request, UUID> {
 
     // Requests for students — can see both students_only and public
-    @Query("""
-        SELECT r FROM Request r
-        WHERE r.block.blockId = :blockId
-          AND r.status = 'OPEN'
-          AND r.expiryTime > :now
-          AND (:type IS NULL OR r.type = :type)
-          AND r.user.userId NOT IN (
-              SELECT ub.blockedId FROM UserBlock ub WHERE ub.blockerId = :viewerId
+    // @Query("""
+    //     SELECT r FROM Request r
+    //     WHERE r.block.blockId = :blockId
+    //       AND r.status = 'OPEN'
+    //       AND r.expiryTime > :now
+    //       AND (:type IS NULL OR r.type = :type)
+    //       AND r.user.userId NOT IN (
+    //           SELECT ub.blockedId FROM UserBlock ub WHERE ub.blockerId = :viewerId
+    //       )
+    //     ORDER BY r.createdAt DESC
+    //     """)
+    // List<Request> findStudentFeed(
+    //     @Param("blockId") UUID blockId,
+    //     @Param("now") Instant now,
+    //     @Param("type") Request.RequestType type,
+    //     @Param("viewerId") UUID viewerId,
+    //     Pageable pageable
+    // );
+    @Query(value = """
+    SELECT r.* FROM requests r
+    WHERE r.block_id = :blockId
+      AND r.status = 'OPEN'
+      AND r.expiry_time > :now
+      AND (CAST(:type AS text) IS NULL OR r.type = CAST(:type AS text))
+      AND r.user_id NOT IN (
+          SELECT ub.blocked_id FROM user_blocks ub WHERE ub.blocker_id = :viewerId
+      )
+    ORDER BY r.created_at DESC
+    """, nativeQuery = true)
+List<Request> findStudentFeed(
+    @Param("blockId") UUID blockId,
+    @Param("now") Instant now,
+    @Param("type") String type,
+    @Param("viewerId") UUID viewerId,
+    Pageable pageable
+);
+
+@Query(value = """
+    SELECT r.* FROM requests r
+    WHERE r.block_id = :blockId
+      AND r.status = 'OPEN'
+      AND r.expiry_time > :now
+      AND r.visibility = 'PUBLIC'
+      AND (CAST(:type AS text) IS NULL OR r.type = CAST(:type AS text))
+      AND r.user_id NOT IN (
+          SELECT ub.blocked_id FROM user_blocks ub WHERE ub.blocker_id = :viewerId
+      )
+    ORDER BY r.created_at DESC
+    """, nativeQuery = true)
+List<Request> findLocalFeed(
+    @Param("blockId") UUID blockId,
+    @Param("now") Instant now,
+    @Param("type") String type,
+    @Param("viewerId") UUID viewerId,
+    Pageable pageable
+);
+
+
+    @Query(value = """
+    SELECT r.* FROM requests r
+    WHERE r.block_id IS NULL
+      AND r.cluster_id IS NULL
+      AND r.status = 'OPEN'
+      AND r.expiry_time > NOW()
+      AND ST_DWithin(
+            ST_Transform(r.geo_point, 3857),
+            ST_Transform(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326), 3857),
+            :radiusMeters
           )
-        ORDER BY r.createdAt DESC
-        """)
-    List<Request> findStudentFeed(
-        @Param("blockId") UUID blockId,
-        @Param("now") Instant now,
-        @Param("type") Request.RequestType type,
-        @Param("viewerId") UUID viewerId,
-        Pageable pageable
-    );
+    """, nativeQuery = true)
+List<Request> findFreePinsNear(
+    @Param("lat") double lat,
+    @Param("lng") double lng,
+    @Param("radiusMeters") double radiusMeters
+);
 
     // Requests for locals — public only
-    @Query("""
-        SELECT r FROM Request r
-        WHERE r.block.blockId = :blockId
-          AND r.status = 'OPEN'
-          AND r.expiryTime > :now
-          AND r.visibility = 'PUBLIC'
-          AND (:type IS NULL OR r.type = :type)
-          AND r.user.userId NOT IN (
-              SELECT ub.blockedId FROM UserBlock ub WHERE ub.blockerId = :viewerId
-          )
-        ORDER BY r.createdAt DESC
-        """)
-    List<Request> findLocalFeed(
-        @Param("blockId") UUID blockId,
-        @Param("now") Instant now,
-        @Param("type") Request.RequestType type,
-        @Param("viewerId") UUID viewerId,
-        Pageable pageable
-    );
+    // @Query("""
+    //     SELECT r FROM Request r
+    //     WHERE r.block.blockId = :blockId
+    //       AND r.status = 'OPEN'
+    //       AND r.expiryTime > :now
+    //       AND r.visibility = 'PUBLIC'
+    //       AND (:type IS NULL OR r.type = :type)
+    //       AND r.user.userId NOT IN (
+    //           SELECT ub.blockedId FROM UserBlock ub WHERE ub.blockerId = :viewerId
+    //       )
+    //     ORDER BY r.createdAt DESC
+    //     """)
+    // List<Request> findLocalFeed(
+    //     @Param("blockId") UUID blockId,
+    //     @Param("now") Instant now,
+    //     @Param("type") Request.RequestType type,
+    //     @Param("viewerId") UUID viewerId,
+    //     Pageable pageable
+    // );
 
     // Radius mode — all visible requests within a GPS circle
-    @Query(value = """
-        SELECT r.* FROM requests r
-        JOIN blocks b ON r.block_id = b.block_id
-        WHERE r.status = 'OPEN'
-          AND r.expiry_time > NOW()
-          AND ST_DWithin(
-                ST_Transform(r.geo_point, 3857),
-                ST_Transform(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326), 3857),
-                :radiusMeters
-              )
-          AND r.user_id NOT IN (
-                SELECT blocked_id FROM user_blocks WHERE blocker_id = :viewerId
+@Query(value = """
+    SELECT r.* FROM requests r
+    LEFT JOIN blocks b ON r.block_id = b.block_id
+    WHERE r.status = 'OPEN'
+      AND r.expiry_time > NOW()
+      AND ST_DWithin(
+            ST_Transform(r.geo_point, 3857),
+            ST_Transform(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326), 3857),
+            :radiusMeters
           )
-        ORDER BY ST_Distance(
-                ST_Transform(r.geo_point, 3857),
-                ST_Transform(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326), 3857)
-               ) ASC
-        """, nativeQuery = true)
-    List<Request> findInRadius(
-        @Param("lat") double lat,
-        @Param("lng") double lng,
-        @Param("radiusMeters") double radiusMeters,
-        @Param("viewerId") UUID viewerId
-    );
+      AND r.user_id NOT IN (
+            SELECT blocked_id FROM user_blocks WHERE blocker_id = :viewerId
+      )
+    ORDER BY ST_Distance(
+            ST_Transform(r.geo_point, 3857),
+            ST_Transform(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326), 3857)
+           ) ASC
+    """, nativeQuery = true)
+List<Request> findInRadius(
+    @Param("lat") double lat,
+    @Param("lng") double lng,
+    @Param("radiusMeters") double radiusMeters,
+    @Param("viewerId") UUID viewerId
+);
 
     // Count open requests in a block — used by heat scheduler
     @Query("SELECT COUNT(r) FROM Request r WHERE r.block.blockId = :blockId " +

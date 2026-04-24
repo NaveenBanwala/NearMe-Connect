@@ -7,6 +7,9 @@ import lombok.Data;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.wololo.jts2geojson.GeoJSONWriter; 
+import org.locationtech.jts.geom.Polygon;
+
 @Data @Builder
 public class BlockResponse {
     private UUID blockId;
@@ -25,12 +28,18 @@ public class BlockResponse {
     private Double distanceMeters;      // populated on nearby query
 
     public static BlockResponse from(Block b) {
+        String geoJson = null;
+    if (b.getGeoPolygon() != null) {
+        GeoJSONWriter writer = new GeoJSONWriter();
+        geoJson = writer.write(b.getGeoPolygon()).toString();
+    }
         return BlockResponse.builder()
             .blockId(b.getBlockId())
             .name(b.getName())
             .category(b.getCategory().name().toLowerCase())
             .centerLat(b.getCenterLat())
             .centerLng(b.getCenterLng())
+            .boundaryGeoJson(geoJson) 
             .heatScore(b.getHeatScore())
             .heatLevel(b.getHeatLevel())
             .liveUserCount(b.getLiveUserCount())

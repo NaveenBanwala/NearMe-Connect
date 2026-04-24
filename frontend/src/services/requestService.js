@@ -1,7 +1,6 @@
 import { api } from './api.js'
 
 export async function fetchRequests(params) {
-  // params: { blockId, mode, type, page }
   const { data } = await api.get('/api/requests', { params })
   return data
 }

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Clock, Users, CheckCircle, Trash2, MapPin } from 'lucide-react'
+import { Clock, CheckCircle, Trash2, MapPin } from 'lucide-react'
 import { useRequestStore } from '../store/requestStore.js'
 import { useAuthStore } from '../store/authStore.js'
-import { fetchRequest, acceptRequest, closeRequest, deleteRequest } from '../services/requestService.js'
+import { fetchRequest, acceptRequest } from '../services/requestService.js'
 import { ROUTES } from '../navigation/routes.js'
 import { REQUEST_TYPE_META } from '../utils/constants.js'
 import { formatRelativeTime } from '../utils/helpers.js'
@@ -11,25 +11,31 @@ import { BackButton } from '../components/shared/BackButton.jsx'
 import { LoadingSpinner } from '../components/shared/LoadingSpinner.jsx'
 
 export function RequestDetailScreen() {
-  const { id }            = useParams()
-  const navigate          = useNavigate()
-  const storeRequest      = useRequestStore((s) => s.getRequestById(id))
-  const updateStore       = useRequestStore((s) => s.closeRequest)
-  const deleteStore       = useRequestStore((s) => s.deleteRequest)
-  const user              = useAuthStore((s) => s.user)
-  const [request, setReq] = useState(storeRequest)
-  const [loading, setLoading]   = useState(!storeRequest)
-  const [working, setWorking]   = useState(false)
-  const [error,   setError]     = useState(null)
+  const { id }       = useParams()
+  const navigate     = useNavigate()
+  const updateStore  = useRequestStore((s) => s.closeRequest)
+  const deleteStore  = useRequestStore((s) => s.deleteRequest)
+  const user         = useAuthStore((s) => s.user)
+
+  const [request, setReq]   = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [working, setWorking] = useState(false)
+  const [error,   setError]   = useState(null)
 
   useEffect(() => {
-    if (storeRequest) { setReq(storeRequest); return }
-    fetchRequest(id).then(r => setReq(r.data)).catch(() => setError('Request not found.')).finally(() => setLoading(false))
+    fetchRequest(id)
+      .then(r => {
+        const data = r.data ?? r
+        setReq(data)
+      })
+      .catch(() => setError('Request not found.'))
+      .finally(() => setLoading(false))
   }, [id])
 
+  // API returns snake_case
   const isOwner  = request?.user_id === user?.user_id
-  const accepted = request?.status  === 'accepted'
-  const closed   = request?.status  === 'closed'
+  const accepted = request?.status === 'accepted'
+  const closed   = request?.status === 'closed'
 
   const handleAccept = async () => {
     setWorking(true); setError(null)
@@ -59,7 +65,11 @@ export function RequestDetailScreen() {
     } catch {} finally { setWorking(false) }
   }
 
-  if (loading) return <div className="flex min-h-dvh items-center justify-center bg-app"><LoadingSpinner size="lg" /></div>
+  if (loading) return (
+    <div className="flex min-h-dvh items-center justify-center bg-app">
+      <LoadingSpinner size="lg" />
+    </div>
+  )
 
   if (!request) return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-app px-6">
@@ -81,14 +91,17 @@ export function RequestDetailScreen() {
       <div className="px-4 pt-5 space-y-4">
         {/* Main card */}
         <div className="card p-5">
-          {/* Type + visibility badges */}
           <div className="flex gap-2 mb-4 flex-wrap">
             <span className={`badge ${meta.color}`}>{meta.emoji} {meta.label}</span>
             <span className="badge bg-slate-100 dark:bg-slate-800 text-muted-app">
               {request.visibility === 'public' ? '🌐 Public' : '🔒 Students'}
             </span>
-            {closed && <span className="badge bg-slate-100 dark:bg-slate-700 text-slate-500">Closed</span>}
-            {accepted && !closed && <span className="badge bg-green-100 dark:bg-green-900/40 text-green-600">Accepted</span>}
+            {closed && (
+              <span className="badge bg-slate-100 dark:bg-slate-700 text-slate-500">Closed</span>
+            )}
+            {accepted && !closed && (
+              <span className="badge bg-green-100 dark:bg-green-900/40 text-green-600">Accepted</span>
+            )}
           </div>
 
           <h1 className="text-xl font-bold text-app mb-2">{request.title}</h1>
@@ -99,11 +112,12 @@ export function RequestDetailScreen() {
 
           <div className="flex gap-4 text-xs text-faint-app">
             <span className="flex items-center gap-1">
-              <Clock size={11} /> {formatRelativeTime(request.created_at)}
+              <Clock size={11} />
+              {request.created_at ? formatRelativeTime(request.created_at) : '—'}
             </span>
-            {request.expires_at && (
+            {request.expiry_time && (
               <span className="flex items-center gap-1">
-                ⏳ Expires {formatRelativeTime(request.expires_at)}
+                ⏳ Expires {formatRelativeTime(request.expiry_time)}
               </span>
             )}
           </div>

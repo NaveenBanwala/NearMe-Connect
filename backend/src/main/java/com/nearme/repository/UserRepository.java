@@ -29,12 +29,23 @@ public interface UserRepository extends JpaRepository<User, UUID> {
            "AND u.lastSeenAt > :cutoff AND u.status = 'ACTIVE'")
     long countLiveUsersInBlock(@Param("blockId") UUID blockId, @Param("cutoff") Instant cutoff);
 
-    // All users who voted for a cluster — used for FCM notification
-    @Query("SELECT u FROM User u JOIN LocationVote lv ON lv.user = u " +
-           "WHERE lv.cluster.clusterId = :clusterId " +
-           "AND u.fcmToken IS NOT NULL AND u.status = 'ACTIVE'")
-    List<User> findVotersByCluster(@Param("clusterId") UUID clusterId);
+
 
     // Pending verification queue
     List<User> findAllByVerificationStatus(User.VerificationStatus status);
+
+
+    // Find all users who posted requests inside a given cluster
+// @Query("SELECT DISTINCT r.user FROM Request r WHERE r.clusterId = :clusterId")
+// List<User> findUsersByClusterId(@Param("clusterId") UUID clusterId);
+
+// ADD this instead:
+@Query("SELECT DISTINCT r.user FROM Request r WHERE r.block.blockId = :blockId")
+List<User> findUsersByBlockId(@Param("blockId") UUID blockId);
+
+// Find all admin users for push notifications
+// List<User> findAllByRole(String role);  // then call with "ADMIN"
+// or if you store admins differently:
+@Query("SELECT u FROM User u WHERE u.admin = true")
+List<User> findAllAdmins();
 }

@@ -9,6 +9,7 @@ import { formatRelativeTime } from '../utils/helpers.js'
 import { BackButton } from '../components/shared/BackButton.jsx'
 import { cn } from '../utils/helpers.js'
 
+
 export function ChatThreadScreen() {
   const { requestId }  = useParams()
   const navigate       = useNavigate()

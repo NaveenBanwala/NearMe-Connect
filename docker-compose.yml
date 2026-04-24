@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: nearme
     ports:
-      - "5433:5432"      # 5433 on host → 5432 in container (avoids conflict with local PG)
+      - "5434:5432"      # 5433 on host → 5432 in container (avoids conflict with local PG)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

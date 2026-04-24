@@ -19,10 +19,15 @@
     "@stomp/stompjs": "^7.3.0",
     "axios": "^1.14.0",
     "clsx": "^2.1.1",
+    "leaflet": "^1.9.4",
+    "leaflet-draw": "^1.0.4",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-leaflet": "^5.0.0",
+    "react-leaflet-draw": "^0.21.0",
     "react-router-dom": "^7.13.2",
+    "sockjs-client": "^1.6.1",
     "zustand": "^5.0.12"
   }
 }

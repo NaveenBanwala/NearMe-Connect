@@ -45,13 +45,13 @@ public class ChatController {
     // WebSocket handler: /app/chat/{requestId}
     // Client sends: STOMP SEND /app/chat/{requestId}
     // Server broadcasts to: /topic/chat/{requestId}
-    @MessageMapping("/chat/{requestId}")
-    public void handleWebSocketMessage(
-        @DestinationVariable UUID requestId,
-        @Payload Map<String, String> payload,
-        @Header("simpUser") java.security.Principal principal
-    ) {
-        UUID senderId = UUID.fromString(principal.getName());
-        chatService.sendMessage(requestId, senderId, payload.get("message"));
-    }
+@MessageMapping("/chat/{requestId}")
+public void handleWebSocketMessage(
+    @DestinationVariable UUID requestId,
+    @Payload Map<String, String> payload,
+    java.security.Principal principal          // ← just remove @Header("simpUser")
+) {
+    UUID senderId = UUID.fromString(principal.getName());
+    chatService.sendMessage(requestId, senderId, payload.get("message"));
+}
 }

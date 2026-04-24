@@ -40,31 +40,33 @@ public class RequestResponse {
 
     // Per-user flag
     private boolean alreadyAccepted;
+public static RequestResponse from(Request r) {
+    long expiresIn = Math.max(0, 
+        r.getExpiryTime().getEpochSecond() - Instant.now().getEpochSecond());
 
-    public static RequestResponse from(Request r) {
-        long expiresIn = Math.max(0,
-            r.getExpiryTime().getEpochSecond() - Instant.now().getEpochSecond());
-
-        return RequestResponse.builder()
-            .requestId(r.getRequestId())
-            .blockId(r.getBlock().getBlockId())
-            .blockName(r.getBlock().getName())
-            .type(r.getType().name().toLowerCase())
-            .title(r.getTitle())
-            .description(r.getDescription())
-            .imageUrl(r.getImageUrl())
-            .visibility(r.getVisibility().name().toLowerCase())
-            .latitude(r.isAnonymous() ? null : r.getLatitude())
-            .longitude(r.isAnonymous() ? null : r.getLongitude())
-            .expiryTime(r.getExpiryTime())
-            .status(r.getStatus().name().toLowerCase())
-            .anonymous(r.isAnonymous())
-            .createdAt(r.getCreatedAt())
-            .expiresInSeconds(expiresIn)
-            .userId(r.isAnonymous() ? null : r.getUser().getUserId())
-            .userName(r.isAnonymous() ? "Anonymous" : r.getUser().getName())
-            .studentVerified(r.getUser().isStudentVerified())
-            .collegeName(r.isAnonymous() ? null : r.getUser().getCollegeName())
-            .build();
-    }
+    return RequestResponse.builder()
+        .requestId(r.getRequestId())
+        // Fix: Use ternary or Optional to prevent NPE
+        // Inside RequestResponse.java
+.blockId(r.getBlock() != null ? r.getBlock().getBlockId() : null)
+.blockName(r.getBlock() != null ? r.getBlock().getName() : "Open Space")
+        // Same for clusters if you add them to the response
+        .type(r.getType().name().toLowerCase())
+        .title(r.getTitle())
+        .description(r.getDescription())
+        .imageUrl(r.getImageUrl())
+        .visibility(r.getVisibility().name().toLowerCase())
+        .latitude(r.isAnonymous() ? null : r.getLatitude())
+        .longitude(r.isAnonymous() ? null : r.getLongitude())
+        .expiryTime(r.getExpiryTime())
+        .status(r.getStatus().name().toLowerCase())
+        .anonymous(r.isAnonymous())
+        .createdAt(r.getCreatedAt())
+        .expiresInSeconds(expiresIn)
+        .userId(r.isAnonymous() ? null : r.getUser().getUserId())
+        .userName(r.isAnonymous() ? "Anonymous" : r.getUser().getName())
+        .studentVerified(!r.isAnonymous() && r.getUser().isStudentVerified())
+        .collegeName(r.isAnonymous() ? null : r.getUser().getCollegeName())
+        .build();
+}
 }

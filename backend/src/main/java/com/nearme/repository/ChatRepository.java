@@ -15,10 +15,9 @@ public interface ChatRepository extends JpaRepository<ChatMessage, UUID> {
 
     List<ChatMessage> findAllByRequestRequestIdOrderBySentAtAsc(UUID requestId);
 
-    @Modifying
-    @Query("UPDATE ChatMessage c SET c.read = true " +
-           "WHERE c.request.requestId = :requestId AND c.sender.userId != :userId")
-    void markAllReadForUser(@Param("requestId") UUID requestId, @Param("userId") UUID userId);
+    @Modifying  // ← THIS is the missing annotation
+@Query("UPDATE ChatMessage m SET m.read = true WHERE m.request.requestId = :requestId AND m.sender.userId != :userId AND m.read = false")
+void markAllReadForUser(@Param("requestId") UUID requestId, @Param("userId") UUID userId);
 
     long countByRequestRequestIdAndReadFalseAndSenderUserIdNot(UUID requestId, UUID userId);
 }

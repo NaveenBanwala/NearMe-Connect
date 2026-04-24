@@ -7,6 +7,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 @Entity
 @Table(name = "acceptances")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -26,6 +29,7 @@ public class Acceptance {
     private User acceptedUser;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM) // This is the "magic" line for Postgres enums
     @Column(name = "status", nullable = false)
     private AcceptanceStatus status = AcceptanceStatus.ACTIVE;
 

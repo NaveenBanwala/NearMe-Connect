@@ -37,21 +37,26 @@ public class Block {
     @Column(name = "center_lng", nullable = false)
     private Double centerLng;
 
-    @Column(name = "heat_score", nullable = false)
-    private Integer heatScore = 0;
+@Builder.Default
+@Column(name = "heat_score", nullable = false)
+private Integer heatScore = 0;
 
-    @Column(name = "live_user_count", nullable = false)
-    private Integer liveUserCount = 0;
+@Builder.Default
+@Column(name = "live_user_count", nullable = false)
+private Integer liveUserCount = 0;
 
-    @Column(name = "open_request_count", nullable = false)
-    private Integer openRequestCount = 0;
+@Builder.Default
+@Column(name = "open_request_count", nullable = false)
+private Integer openRequestCount = 0;
 
-    @Column(name = "heat_updated_at", nullable = false)
-    private Instant heatUpdatedAt = Instant.now();
+@Builder.Default
+@Column(name = "heat_updated_at", nullable = false)
+private Instant heatUpdatedAt = Instant.now();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private BlockStatus status = BlockStatus.ACTIVE;
+@Builder.Default
+@Enumerated(EnumType.STRING)
+@Column(name = "status", nullable = false)
+private BlockStatus status = BlockStatus.ACTIVE;
 
     @Column(name = "trial_expires_at")
     private Instant trialExpiresAt;
@@ -80,7 +85,7 @@ public class Block {
     }
 
   public enum BlockCategory { 
-    CAMPUS, LOCALITY, SOCIETY, MARKET;
+    CAMPUS, LOCALITY, SOCIETY, MARKET,VILLAGE;
 
     @com.fasterxml.jackson.annotation.JsonCreator
     public static BlockCategory fromString(String value) {

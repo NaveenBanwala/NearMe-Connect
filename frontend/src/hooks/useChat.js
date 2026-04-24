@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
+import { useShallow } from 'zustand/react/shallow'  // ← add this
 import { useChatStore } from '../store/chatStore.js'
 import { useAuthStore }  from '../store/authStore.js'
 
 export function useChat(requestId) {
   const token        = useAuthStore((s) => s.token)
-  const messages     = useChatStore((s) => s.messagesFor(requestId))
+  const messages     = useChatStore((s) => s.messagesFor(requestId))  // stable now
   const loadMessages = useChatStore((s) => s.loadMessages)
   const connectToChat= useChatStore((s) => s.connectToChat)
   const disconnect   = useChatStore((s) => s.disconnectChat)
@@ -20,9 +21,7 @@ export function useChat(requestId) {
 
   return {
     messages,
-    // send via WS (falls back to REST)
     send:   (text) => sendMsg(requestId, text, token),
-    // local optimistic append (for legacy callers)
     append: (reqId, msg) => appendMsg(reqId, msg),
   }
 }

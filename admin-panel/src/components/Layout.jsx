@@ -8,13 +8,13 @@ import {
 import clsx from 'clsx'
 
 const NAV = [
-  { to: '/dashboard',      icon: LayoutDashboard, label: 'Dashboard',          badge: null },
-  { to: '/block-requests', icon: MapPin,           label: 'Block Requests',     badge: 'votes' },
-  { to: '/block-editor',   icon: Map,              label: 'Block Editor',       badge: null },
-  { to: '/users',          icon: Users,            label: 'Users',              badge: null },
-  { to: '/verification',   icon: ShieldCheck,      label: 'Verification Queue', badge: 'pending' },
-  { to: '/heatmap',        icon: Flame,            label: 'Heat Map',           badge: 'live' },
-  { to: '/reports',        icon: Flag,             label: 'Reports',            badge: 'new' },
+  { to: '/dashboard',      icon: LayoutDashboard, label: 'Dashboard',           badge: null },
+  { to: '/clusters/review', icon: MapPin, label: 'Cluster Review', badge: 'votes' },
+  { to: '/block-editor',   icon: Map,               label: 'Block Editor',        badge: null },
+  { to: '/users',           icon: Users,             label: 'Users',               badge: null },
+  { to: '/verification',   icon: ShieldCheck,       label: 'Verification Queue', badge: 'pending' },
+  { to: '/heatmap',         icon: Flame,             label: 'Heat Map',            badge: 'live' },
+  { to: '/reports',          icon: Flag,              label: 'Reports',             badge: 'new' },
 ]
 
 const BADGE_COLORS = {
@@ -54,19 +54,16 @@ function NavItem({ item, onClick }) {
   )
 }
 
-function Sidebar({ onClose }) {
+function Sidebar({ onClose, onLogout, user }) {
   return (
     <div className="flex flex-col h-full">
-      {/* Logo */}
+      {/* Logo Section */}
       <div className="flex items-center justify-between px-4 py-5 border-b border-base-600">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
             <Activity size={16} className="text-base-900" />
           </div>
-          <div>
-            <p className="text-white font-semibold text-sm font-display leading-none">NearMe</p>
-            <p className="text-amber-500/70 text-[10px] font-mono uppercase tracking-widest mt-0.5">Admin</p>
-          </div>
+          <span className="text-white font-bold tracking-tight text-lg">NearMe</span>
         </div>
         {onClose && (
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-base-600 text-slate-400 lg:hidden">
@@ -75,7 +72,7 @@ function Sidebar({ onClose }) {
         )}
       </div>
 
-      {/* Nav */}
+      {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         <p className="text-[10px] font-mono uppercase tracking-widest text-slate-600 px-3 mb-2">Main</p>
         {NAV.slice(0, 2).map(item => <NavItem key={item.to} item={item} onClick={onClose} />)}
@@ -85,25 +82,30 @@ function Sidebar({ onClose }) {
         {NAV.slice(5).map(item => <NavItem key={item.to} item={item} onClick={onClose} />)}
       </nav>
 
-      {/* Footer */}
+      {/* Footer Actions */}
       <div className="px-3 py-4 border-t border-base-600 space-y-1">
         <button className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-base-700 transition-all">
           <Settings size={16} className="text-slate-500" />
           Settings
         </button>
-        <button className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all">
+        <button 
+          onClick={onLogout}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all"
+        >
           <LogOut size={16} className="text-slate-500" />
           Sign out
         </button>
       </div>
 
-      {/* Admin tag */}
-      <div className="px-4 py-3 border-t border-base-600">
+      {/* User Profile Block */}
+      <div className="px-4 py-3 border-t border-base-600 bg-base-800/50">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs font-bold">A</div>
-          <div>
-            <p className="text-sm text-white font-medium">Super Admin</p>
-            <p className="text-[11px] text-slate-500 font-mono">admin@nearme.app</p>
+          <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs font-bold">
+            {(user?.name || 'A').charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-white font-medium truncate">{user?.name || 'Admin User'}</p>
+            <p className="text-[11px] text-slate-500 font-mono truncate">{user?.phone || 'admin@nearme.app'}</p>
           </div>
         </div>
       </div>
@@ -111,7 +113,7 @@ function Sidebar({ onClose }) {
   )
 }
 
-export default function Layout({onLogout,user}) {
+export default function Layout({ onLogout, user }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
   const currentPage = NAV.find(n => n.to === location.pathname)?.label || 'Dashboard'
@@ -120,7 +122,7 @@ export default function Layout({onLogout,user}) {
     <div className="flex h-screen overflow-hidden bg-base-900">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 bg-base-800 border-r border-base-600 flex-shrink-0">
-        <Sidebar />
+        <Sidebar onLogout={onLogout} user={user} />
       </aside>
 
       {/* Mobile drawer backdrop */}
@@ -136,10 +138,14 @@ export default function Layout({onLogout,user}) {
         'fixed top-0 left-0 z-50 h-full w-64 bg-base-800 border-r border-base-600 transition-transform duration-300 lg:hidden',
         mobileOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
-        <Sidebar onClose={() => setMobileOpen(false)} />
+        <Sidebar 
+          onClose={() => setMobileOpen(false)} 
+          onLogout={onLogout} 
+          user={user} 
+        />
       </aside>
 
-      {/* Main */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
         <header className="flex items-center justify-between px-4 lg:px-6 py-3 bg-base-800 border-b border-base-600 flex-shrink-0">
@@ -159,7 +165,6 @@ export default function Layout({onLogout,user}) {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Live indicator */}
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
               <span className="text-red-400 text-xs font-mono">Live</span>
@@ -171,26 +176,6 @@ export default function Layout({onLogout,user}) {
             </button>
           </div>
         </header>
-
-         <button
-    onClick={onLogout}
-    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all"
-  >
-    <LogOut size={16} className="text-slate-500" />
-    Sign out
-  </button>
-
-    <div className="px-4 py-3 border-t border-base-600">
-    <div className="flex items-center gap-2.5">
-      <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs font-bold">
-        {(user?.name || 'A').charAt(0).toUpperCase()}
-      </div>
-      <div>
-        <p className="text-sm text-white font-medium">{user?.name || 'Admin'}</p>
-        <p className="text-[11px] text-slate-500 font-mono">{user?.phone}</p>
-      </div>
-    </div>
-  </div>
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6 animate-fade-in">

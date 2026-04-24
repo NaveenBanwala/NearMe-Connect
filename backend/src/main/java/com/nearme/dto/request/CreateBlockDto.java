@@ -1,6 +1,7 @@
 package com.nearme.dto.request;
 
 import com.nearme.model.Block;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -24,6 +25,9 @@ public class CreateBlockDto {
 
     @NotNull
     private Double centerLat;
+
+    @Nullable
+private UUID sourceClusterId;
 
     @NotNull
     private Double centerLng;

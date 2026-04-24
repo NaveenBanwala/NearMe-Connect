@@ -40,7 +40,7 @@ public class ChatService {
             throw new UnauthorizedException("You are not part of this chat");
         }
     }
-
+   @Transactional
     public List<ChatMessageResponse> getMessages(UUID requestId, UUID userId) {
         validateChatAccess(requestId, userId);
         chatRepository.markAllReadForUser(requestId, userId);

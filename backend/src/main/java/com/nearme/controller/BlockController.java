@@ -37,6 +37,12 @@ public class BlockController {
         return ResponseEntity.ok(blockService.getNearbyCampus(lat, lng, radius));
     }
 
+    // Add this endpoint — GET /api/blocks (all active blocks)
+@GetMapping
+public ResponseEntity<List<BlockResponse>> getAll() {
+    return ResponseEntity.ok(blockService.getAllBlocks());
+}
+
     // GET /api/blocks/search?q=
     @GetMapping("/search")
     public ResponseEntity<List<BlockResponse>> search(@RequestParam String q) {

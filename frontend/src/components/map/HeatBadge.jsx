@@ -14,7 +14,7 @@ export function HeatBadge({ score, className }) {
     )}>
       <span aria-hidden className="text-sm leading-none">{p.emoji}</span>
       <span>{p.label}</span>
-      <span className="opacity-70">({Math.round(p.score)})</span>
+      {/* <span className="opacity-70">({Math.round(p.score)})</span> */}
     </span>
   )
 }

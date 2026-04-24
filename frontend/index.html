@@ -9,21 +9,72 @@
     <meta name="description" content="NearMe Connect — discover blocks, post requests, connect with people near you." />
 
     <title>NearMe Connect</title>
-
-    <!-- Favicon placeholder — replace with real icon -->
+    <link rel="icon" href="data:," />
     <link rel="icon" href="/favicon.ico" />
+    
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+
+    <style>
+      /* Base Web Reset */
+      body, html, #root {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* CLUSTER HEAT BLOB ANIMATIONS 
+         Matches script requirement 3.1: "Soft glowing heat blobs" 
+      */
+      @keyframes blob-pulse {
+        0% { transform: scale(1); opacity: 1; filter: blur(4px); }
+        50% { transform: scale(1.15); opacity: 0.7; filter: blur(8px); }
+        100% { transform: scale(1); opacity: 1; filter: blur(4px); }
+      }
+
+      /* Pulse speed mapping based on backend heatScore */
+      .pulse-slow { animation: blob-pulse 3s infinite ease-in-out; }
+      .pulse-medium { animation: blob-pulse 2s infinite ease-in-out; }
+      .pulse-fast { animation: blob-pulse 1.5s infinite ease-in-out; }
+      .pulse-very-fast { animation: blob-pulse 1s infinite ease-in-out; }
+      .pulse-blazing { animation: blob-pulse 0.7s infinite ease-in-out; }
+
+      /* Cluster Container for Maps */
+      .cluster-marker-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none; /* Allow clicks to pass to the map if needed */
+      }
+
+      .cluster-marker-blob {
+        border-radius: 50%;
+        pointer-events: auto; /* Re-enable clicks for the actual blob */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+    </style>
   </head>
-  <body>
+<body>
     <div id="root"></div>
+    
+    <script type="module">
+      import RefreshRuntime from 'http://localhost:5173/@react-refresh'
+      RefreshRuntime.injectIntoGlobalHook(window)
+      window.$RefreshReg$ = () => {}
+      window.$RefreshSig$ = () => (type) => type
+      window.__vite_plugin_react_preamble_installed__ = true
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

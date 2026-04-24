@@ -60,7 +60,7 @@ export default function Dashboard() {
         <StatsWidget label="Open Requests"     value={stats?.open_requests || 0}                        sub="across all blocks"  icon={Flame}       accent="amber"  />
         <StatsWidget label="Verified Students" value={(stats?.verified_students || 0).toLocaleString()} sub="college ID approved" icon={ShieldCheck} accent="green"  />
         <StatsWidget label="Pending Verify"    value={stats?.pending_verify || 0}                       sub="awaiting review"    icon={ShieldCheck} accent="purple" />
-        <StatsWidget label="Pending Votes"     value={stats?.pending_votes || 0}                        sub="block requests"     icon={MapPin}      accent="amber"  />
+       <StatsWidget label="Flagged Clusters" value={stats?.flagged_clusters || 0} sub="pending review" icon={MapPin} accent="amber" />
         <StatsWidget label="Open Reports"      value={stats?.open_reports || 0}                         sub="flagged content"    icon={Flag}        accent="red"    />
       </div>
 

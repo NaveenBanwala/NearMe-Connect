@@ -16,6 +16,34 @@
   ::-webkit-scrollbar-thumb:hover { @apply bg-amber-600; }
 }
 
+/* Custom Search Bar Styling */
+.leaflet-control-geocoder {
+  border-radius: 8px !important;
+  background: #1e293b !important; /* Matches your dark theme */
+  border: 1px solid #475569 !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+}
+
+.leaflet-control-geocoder-form input {
+  color: white !important;
+  font-family: inherit;
+  padding: 6px 10px !important;
+}
+
+.leaflet-control-geocoder-icon {
+  filter: invert(1); /* Makes the magnifying glass white */
+}
+
+.leaflet-control-geocoder-alternatives {
+  background: #0f172a !important; /* Result dropdown background */
+  color: #94a3b8 !important;
+}
+
+.leaflet-control-geocoder-alternatives li:hover {
+  background: #334155 !important;
+  color: white !important;
+}
+
 @layer components {
   .card {
     @apply bg-base-800 border border-base-600 rounded-xl;

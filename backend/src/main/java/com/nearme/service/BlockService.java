@@ -20,16 +20,27 @@ public class BlockService {
     private final BlockRepository blockRepository;
     private final GeoService      geoService;
 
-    public List<BlockResponse> getNearby(double lat, double lng, double radiusMeters) {
-        return blockRepository.findNearby(lat, lng, radiusMeters).stream()
-            .map(b -> {
-                BlockResponse resp = BlockResponse.from(b);
-                resp.setUserIsInside(blockRepository.isPointInsideBlock(b.getBlockId(), lat, lng));
-                return resp;
-            })
-            .collect(Collectors.toList());
-    }
-
+ public List<BlockResponse> getNearby(double lat, double lng, double radiusMeters) {
+    return blockRepository.findNearby(lat, lng, radiusMeters).stream()
+        .map(b -> {
+            BlockResponse resp = BlockResponse.from(b);
+            resp.setBoundaryGeoJson(geoService.toGeoJson(b.getGeoPolygon())); // ✅ ADD THIS
+            resp.setUserIsInside(blockRepository.isPointInsideBlock(b.getBlockId(), lat, lng));
+            return resp;
+        })
+        .collect(Collectors.toList());
+}
+public List<BlockResponse> getAllBlocks() {
+    return blockRepository.findAllByStatus(Block.BlockStatus.ACTIVE)
+        .stream()
+        .sorted((a, b) -> Double.compare(b.getHeatScore(), a.getHeatScore()))
+        .map(b -> {
+            BlockResponse resp = BlockResponse.from(b);
+            resp.setBoundaryGeoJson(geoService.toGeoJson(b.getGeoPolygon()));
+            return resp;
+        })
+        .collect(Collectors.toList());
+}
     public List<BlockResponse> getNearbyCampus(double lat, double lng, double radiusMeters) {
         return blockRepository.findNearbyByCategory(lat, lng, radiusMeters).stream()
             .map(b -> {
@@ -39,14 +50,17 @@ public class BlockService {
             })
             .collect(Collectors.toList());
     }
-
-    public List<BlockResponse> search(String query) {
-        return blockRepository
-            .findByNameContainingIgnoreCaseAndStatus(query, Block.BlockStatus.ACTIVE)
-            .stream()
-            .map(BlockResponse::from)
-            .collect(Collectors.toList());
-    }
+public List<BlockResponse> search(String query) {
+    return blockRepository
+        .findByNameContainingIgnoreCaseAndStatus(query, Block.BlockStatus.ACTIVE)
+        .stream()
+        .map(b -> {
+            BlockResponse resp = BlockResponse.from(b);
+            resp.setBoundaryGeoJson(geoService.toGeoJson(b.getGeoPolygon()));
+            return resp;
+        })
+        .collect(Collectors.toList()); // ✅ this was missing
+}
 
     public BlockResponse getBlock(UUID blockId) {
         Block b = blockRepository.findById(blockId)
